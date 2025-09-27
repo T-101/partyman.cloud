@@ -1,0 +1,38 @@
+name: partymancloud
+
+services:
+  app:
+    build: app
+    image: local/partymancloud
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    # command: bash -c "gunicorn config.wsgi -w 1 -b 0.0.0.0:8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./app:/app
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - redis
+
+  dramatiq:
+    build: app
+    image: local/partymancloud
+    init: true
+    command: dramatiq config.tasks --processes 1 --threads 2
+    volumes:
+      - ./app:/app
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.4.1-alpine3.20
+    restart: unless-stopped
+    init: true
+    # To persist data
+    # volumes:
+    #   - redis_data:/data

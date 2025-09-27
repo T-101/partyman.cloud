@@ -1,0 +1,31 @@
+{% extends "request/base.html" %}{% load crispy_forms_tags %}
+{% block extrahead %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css"
+          integrity="sha512-MQXduO8IQnJVq1qmySpN87QQkiR1bZHtorbJBD0tzy7/0U9+YIC93QWHeGTEoojMVHWWNkoCp8V6OzVSYrX0oQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/themes/dark.min.css"
+          integrity="sha512-9j8LE+fuBZgXOsSyiXCw0LmM4LSLIo94AYem4pQzyqlbw5wC4qK2ytHjOLy9pGH3DbvoXawLPuiVfr8gXOKXWw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr(".dateinput", {
+                locale: {
+                    firstDayOfWeek: 1
+                }
+            })
+        })
+    </script>
+{% endblock %}
+{% block content %}
+
+    <h3>Request PartyMan instance</h3>
+
+    {% crispy form %}
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"
+            integrity="sha512-K/oyQtMXpxI4+K0W7H25UopjM8pzq0yrVdFdG21Fh5dBe91I40pDd9A4lzNlHPHBIP2cwZuoxaUSX0GJSObvGA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}

@@ -1,0 +1,16 @@
+*.pyc
+.idea/*
+.vscode/*
+.env
+.db-env
+db.sqlite3
+docker-compose.override.yml
+crontab.error
+crontab.log
+
+media/*
+static/*
+logs/*.log
+
+.DS_Store
+
