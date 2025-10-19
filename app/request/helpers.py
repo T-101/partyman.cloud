@@ -2,10 +2,11 @@ from copy import deepcopy
 
 from cloudflare import Cloudflare
 import requests
+from cloudflare.types.dns import ARecord
+from requests.auth import HTTPBasicAuth
 
 from django.conf import settings
 from django.utils import timezone
-from requests.auth import HTTPBasicAuth
 
 from request.models import CloudflareZone, UpCloudZone, Request, SSHKeys
 
@@ -16,6 +17,7 @@ BASE_UPCLOUD_PAYLOAD = {
         "hostname": "",
         "plan": "",
         "metadata": "yes",
+        "user_data": "",
         "storage_devices": {
             "storage_device": [
                 {
@@ -40,8 +42,8 @@ BASE_UPCLOUD_PAYLOAD = {
             "username": "root",
             "ssh_keys": {
                 "ssh_key": []
-            },
-        },
+            }
+        }
     }
 }
 
@@ -64,8 +66,18 @@ def update_cloudflare_zones() -> None:
         CloudflareZone.objects.filter(cloudflare_id__in=ids_to_hide).update(visible=False)
 
 
+def get_cloudflare_dns_records(zone: CloudflareZone) -> list[ARecord]:
+    client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    records = client.dns.records.list(zone_id=zone.cloudflare_id)
+    return records.result
+
+
 def create_cloudflare_dns_entry(zone: CloudflareZone, domain: str, ip_address: str) -> str:
     client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    domain = f"{domain}.{zone.name}"
+    dns_records = get_cloudflare_dns_records(zone)
+    if domain in [record.name for record in dns_records]:
+        raise ValueError("DNS record already exists")
     res = client.dns.records.create(zone_id=zone.cloudflare_id, name=domain,
                                     type="A", content=ip_address, ttl=1)
     return res.id
@@ -93,18 +105,19 @@ def update_upcloud_zones():
         UpCloudZone.objects.filter(name__in=zones_to_delete).update(visible=False)
 
 
-def create_upcloud_server(zone: UpCloudZone, request: Request) -> (tuple[str, str]):
+def create_upcloud_server(request: Request) -> (tuple[str, str]):
     def make_payload():
         payload = deepcopy(BASE_UPCLOUD_PAYLOAD)
-        payload["server"]["zone"] = zone.name
+        payload["server"]["zone"] = request.upcloud_zone.name
         payload["server"]["title"] = request.domain + "." + request.cloudflare_zone.name
         payload["server"]["hostname"] = request.domain + "." + request.cloudflare_zone.name
         payload["server"]["plan"] = request.upcloud_plan.name
+        payload["server"]["user_data"] = get_init_script(request)
         payload["server"]["login_user"]["ssh_keys"]["ssh_key"] = list(
             SSHKeys.objects.values_list("public_key", flat=True))
         return payload
 
-    if not zone.name or not request.cloudflare_zone or not request.domain or not request.upcloud_plan:
+    if not request.upcloud_zone.name or not request.cloudflare_zone or not request.domain or not request.upcloud_plan:
         raise ValueError("Zone or Plan not set")
 
     if not SSHKeys.objects.count():
@@ -132,3 +145,18 @@ def delete_upcloud_server(request: Request) -> int:
     request.deactivated = timezone.now()
     request.save()
     return res.status_code
+
+
+def get_init_script(request: Request) -> str:
+    res = requests.get(settings.INIT_SCRIPT_URL)
+    script = res.text
+    domain = f"{request.domain}.{request.cloudflare_zone.name}"
+    script = script.replace("$IP", domain)
+    script += f"\ncertbot --nginx -d {domain} --register-unsafely-without-email --agree-tos --non-interactive\n"
+    script += "sed -i -e 's/443 ssl/443 ssl http2/' /etc/nginx/sites-available/partyman.conf\n"
+    script += "service nginx reload\n"
+    script += "cd /opt/\n"
+    script += "git clone https://gitlab.com/T-101/pms3.git partyman\n"
+    script += "cd /opt/partyman\n"
+    script += f"./init_partyman.sh {domain}\n"
+    return script
