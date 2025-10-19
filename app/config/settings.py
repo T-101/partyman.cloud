@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_cf_turnstile',
     # apps
     'request'
 ]
@@ -61,7 +62,6 @@ if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
 
 DEBUG_TOOLBAR_CONFIG['IS_RUNNING_TESTS'] = False  # I don't like this, but was unable to get it to work otherwise
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,10 +73,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 if DEBUG:
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-
 
 ROOT_URLCONF = 'config.urls'
 
@@ -148,8 +146,13 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+CF_TURNSTILE_SITE_KEY = env.str('CF_TURNSTILE_SITE_KEY')
+CF_TURNSTILE_SECRET_KEY = env.str('CF_TURNSTILE_SECRET_KEY')
+
 UPCLOUD_API_USERNAME = env.str('UPCLOUD_API_USERNAME')
 UPCLOUD_API_PASSWORD = env.str('UPCLOUD_API_PASSWORD')
 UPCLOUD_API_URL = env.str('UPCLOUD_API_URL')
 
 CLOUDFLARE_API_TOKEN = env.str('CLOUDFLARE_API_TOKEN')
+
+INIT_SCRIPT_URL = "https://gitlab.com/T-101/pms3/-/raw/master/contrib/debian_init_script.sh"
