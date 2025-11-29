@@ -2,6 +2,7 @@ import re
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 from django_extensions.db.models import TimeStampedModel
 
@@ -11,6 +12,37 @@ def domain_validator(value):
         raise ValidationError(
             'Domain can only contain lowercase letters (a-z), numbers (0-9) and hyphens (-).'
         )
+
+
+class PortfolioItem(TimeStampedModel):
+    heading = models.CharField(max_length=255)
+    subtitle = models.TextField(blank=True, null=True)
+    text = models.TextField(blank=True, null=True)
+
+    image = models.ImageField(blank=True, null=True,
+                              help_text="Aspect ratio must be 2.4:1 (example: 960x400px)")
+
+    url = models.URLField(blank=True, null=True)
+    sort_order = models.IntegerField(default=0)
+    visible = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.heading
+
+
+class ExternalURL(TimeStampedModel):
+    portfolio_item = models.ForeignKey(PortfolioItem, on_delete=models.CASCADE, related_name='external_urls')
+    url = models.URLField()
+    title = models.CharField(max_length=255)
+    sort_order = models.IntegerField(default=0)
+    visible = models.BooleanField(default=True)
+
+
+class Testimonial(TimeStampedModel):
+    portfolio_item = models.ForeignKey('PortfolioItem', on_delete=models.CASCADE, related_name='testimonials')
+    by = models.CharField(max_length=255)
+    text = models.TextField()
+    visible = models.BooleanField(default=True)
 
 
 class Request(TimeStampedModel):
@@ -79,6 +111,7 @@ class SSHKeys(models.Model):
     class Meta:
         verbose_name = "SSH Keys"
         verbose_name_plural = "SSH Keys"
+
     user = models.CharField(max_length=255)
     public_key = models.TextField()
 

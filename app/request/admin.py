@@ -1,6 +1,17 @@
 from django.contrib import admin
 
-from .models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys
+from .models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial
+
+
+@admin.register(PortfolioItem)
+class PortfolioItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'heading', 'sort_order', 'visible']
+
+
+@admin.register(ExternalURL)
+class ExternalURLAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'url', 'visible']
+    list_filter = ['created', 'modified', 'visible']
 
 
 @admin.register(Request)

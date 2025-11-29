@@ -8,8 +8,8 @@ docker-compose.override.yml
 crontab.error
 crontab.log
 
-media/*
-static/*
+app/media/*
+app/static/*
 logs/*.log
 
 .DS_Store

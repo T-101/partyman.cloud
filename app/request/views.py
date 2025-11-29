@@ -1,14 +1,28 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, FormView, UpdateView
+from django.views.generic import CreateView, TemplateView, UpdateView, ListView
+from django.utils import timezone
 
 from request.forms import RequestForm, ActivationForm
 from request.helpers import get_cloudflare_dns_records, create_cloudflare_dns_entry, create_upcloud_server, \
     delete_cloudflare_dns_entry, stop_upcloud_server, delete_upcloud_server
-from request.models import Request
+from request.models import Request, PortfolioItem
 
 
-class IndexView(CreateView):
+class LandingPageView(ListView):
+    template_name = "landingpage/index.html"
+    model = PortfolioItem
+
+    def get_queryset(self):
+        return self.model.objects.filter(visible=True).order_by("sort_order")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["timestamp"] = timezone.now()
+        return ctx
+
+
+class RequestIndexView(CreateView):
     template_name = "request/index.html"
     model = Request
     form_class = RequestForm
