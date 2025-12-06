@@ -56,7 +56,7 @@
     </div>
 </header>
 <!-- Services-->
-<section class="page-section" id="features">
+<section class="page-section bg-light" id="features">
     <div class="container">
         <div class="text-center">
             <h2 class="section-heading text-uppercase">Features</h2>
@@ -117,7 +117,7 @@
     </div>
 </section>
 
-<section class="page-section bg-light" id="request">
+<section class="page-section" id="request">
     <div class="container">
         <div class="text-center">
             <h2 class="section-heading text-uppercase">Request an instance</h2>
@@ -143,8 +143,10 @@
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content"><i class="fas fa-link fa-3x"></i></div>
                             </div>
-                            <img class="img-fluid" src="{{ item.image.url }}"
-                                 alt="Assembly logo"/>
+                            {% if item.image %}
+                                <img class="img-fluid" src="{{ item.image.url }}"
+                                     alt="{{ item.name }} logo"/>
+                            {% endif %}
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">{{ item.heading }}</div>
@@ -153,111 +155,6 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
-        <div class="text-center">
-            <h2 class="section-heading text-uppercase">Portfolio</h2>
-            <h3 class="section-subheading text-muted">These are some of the parties that have trusted Partyman</h3>
-        </div>
-        <div class="row">
-            <div class="col-lg-4 col-sm-6 mb-4">
-                <!-- Portfolio item 1-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal1">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-link fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_assembly_480x200.png" alt="Assembly logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">Assembly</div>
-                        <div class="portfolio-caption-subheading text-muted">Largest demoscene enabled party in the
-                            world
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6 mb-4">
-                <!-- Portfolio item 2-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal2">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_bukka_480x200.png" alt="Bukka logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">Bukka</div>
-                        <div class="portfolio-caption-subheading text-muted">For the brave-hearted few who like AMIGA
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6 mb-4">
-                <!-- Portfolio item 3-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal3">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_saunasolmu_480x200.png"
-                             alt="Saunasolmu logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">Saunasolmu</div>
-                        <div class="portfolio-caption-subheading text-muted">From the Lihamuki central of the World
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6 mb-4 mb-lg-0">
-                <!-- Portfolio item 4-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal4">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_transmissionn64_480x200.png"
-                             alt="Transmission64 logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">Transmission64</div>
-                        <div class="portfolio-caption-subheading text-muted">For the ones who enjoy beeps with their
-                            boops
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6 mb-4 mb-sm-0">
-                <!-- Portfolio item 5-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal5">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_zoo_480x200.png" alt="Zooparty logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">Zooparty</div>
-                        <div class="portfolio-caption-subheading text-muted">C64!</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-sm-6">
-                <!-- Portfolio item 6-->
-                <div class="portfolio-item">
-                    <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal6">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                        </div>
-                        <img class="img-fluid" src="assets/img/portfolio/pm_68kinside_480x200.png"
-                             alt="68k Inside Logo"/>
-                    </a>
-                    <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">68k Inside</div>
-                        <div class="portfolio-caption-subheading text-muted">Amigaaaaaa!!</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>
@@ -488,17 +385,21 @@
                                 <!-- Project details-->
                                 <h2 class="text-uppercase">{{ item.heading }}</h2>
                                 <p class="item-intro text-muted">{{ item.subtitle }}</p>
-                                <img class="img-fluid d-block mx-auto"
-                                     src="{{ item.image.url }}"
-                                     alt="Assembly logo"/>
+                                {% if item.image %}
+                                    <img class="img-fluid d-block mx-auto"
+                                         src="{{ item.image.url }}"
+                                         alt="Assembly logo"/>
+                                {% endif %}
                                 <p>
                                     {{ item.text }}
                                 </p>
                                 <ul class="list-inline">
-                                    <li style="margin-bottom: 1em;">
-                                        <strong>Official site:</strong>
-                                        <a href="{{ item.url }}">{{ item.url }}</a>
-                                    </li>
+                                    {% if item.url %}
+                                        <li style="margin-bottom: 1em;">
+                                            <strong>Official site:</strong>
+                                            <a href="{{ item.url }}">{{ item.url }}</a>
+                                        </li>
+                                    {% endif %}
                                     {% for item_url in item.external_urls.all %}
                                         <li>
                                             <strong>{{ item_url.title }}:</strong>
