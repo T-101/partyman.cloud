@@ -58,6 +58,7 @@ class ActivationDetailView(UpdateView):
             stop_upcloud_server(form.instance)
             delete_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.cloudflare_dns_record_id)
             delete_upcloud_server(form.instance)
+            form.instance.deactivated_by = self.request.user
         else:
             # print(type(form.instance), vars(form.instance))
             domain = form.instance.domain + "." + form.instance.cloudflare_zone.name
@@ -72,5 +73,6 @@ class ActivationDetailView(UpdateView):
             cf_dns_id = create_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.domain, server_address)
             form.instance.cloudflare_dns_record_id = cf_dns_id
             form.instance.is_approved = True
+            form.instance.activated_by = self.request.user
 
         return super().form_valid(form)
