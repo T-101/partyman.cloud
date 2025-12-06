@@ -3,9 +3,21 @@ from django.contrib import admin
 from .models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial
 
 
+class ExternalURLInline(admin.TabularInline):
+    model = ExternalURL
+    extra = 0
+
+
+class TestimonialInline(admin.TabularInline):
+    model = Testimonial
+    extra = 0
+
+
 @admin.register(PortfolioItem)
 class PortfolioItemAdmin(admin.ModelAdmin):
     list_display = ['id', 'heading', 'sort_order', 'visible']
+    inlines = [ExternalURLInline, TestimonialInline]
+    list_editable = ['visible', 'sort_order']
 
 
 @admin.register(ExternalURL)
