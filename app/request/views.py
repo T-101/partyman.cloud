@@ -33,8 +33,15 @@ class SuccessView(TemplateView):
     template_name = "request/success.html"
 
 
-class ActivationView(UpdateView):
-    template_name = "request/activation.html"
+class ActivationListView(ListView):
+    template_name = "request/activation-list.html"
+
+    def get_queryset(self):
+        return Request.objects.order_by("-party_start")
+
+
+class ActivationDetailView(UpdateView):
+    template_name = "request/activation-detail.html"
     model = Request
     form_class = ActivationForm
     success_url = reverse_lazy('request:success')
