@@ -9,7 +9,7 @@ services:
     # command: bash -c "gunicorn config.wsgi -w ${UWSGI_WORKERS} -b 0.0.0.0:${CONTAINER_PORT}"
 
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${CONTAINER_PORT}:${CONTAINER_PORT}"
     volumes:
       - ./app:/app
     restart: unless-stopped
