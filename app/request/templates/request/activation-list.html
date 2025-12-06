@@ -1,8 +1,39 @@
-{% extends 'request/base.html' %}{% load crispy_forms_tags %}
+{% extends 'request/base.html' %}
 
-{% block title %}Activate PartyMan Instance{% endblock %}
+{% block title %}Manage Partyman instances{% endblock %}
 
 {% block content %}
-    <h2>Activate PartyMan instance</h2>
-    {% crispy form %}
+    <h2>Manage Partyman instances</h2>
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+            <tr>
+                <th colspan="2">Name</th>
+                <th>Start</th>
+                <th>Activated</th>
+                <th>Deactivated</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>
+                        {{ object.party_name }}
+                        {% if object.party_url %}
+                            <br> <small><a href="{{ object.party_url }}">{{ object.party_url }}</a></small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not object.deactivated %}
+                            <a href="{% url 'request:activation-detail' object.pk %}" class="btn btn-primary">Manage</a>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ object.party_start|date:"Y-m-d" }}</small></td>
+                    <td><small>{{ object.activated|date:"Y-m-d" }}<br>{{ object.activated|date:"H:i" }}</small></td>
+                    <td><small>{{ object.deactivated|date:"Y-m-d" }}<br>{{ object.deactivated|date:"H:i" }}</small></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
