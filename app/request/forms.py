@@ -72,6 +72,12 @@ class ActivationForm(ModelForm):
         self.fields['upcloud_zone'].widget.attrs.update({"autocomplete": "off"})
         self.fields['upcloud_plan'].widget.attrs.update({"autocomplete": "off"})
 
+        if self.approved:
+            self.fields['domain'].widget.attrs.update({"disabled": True})
+            self.fields['cloudflare_zone'].widget.attrs.update({"disabled": True})
+            self.fields['upcloud_zone'].widget.attrs.update({"disabled": True})
+            self.fields['upcloud_plan'].widget.attrs.update({"disabled": True})
+
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
