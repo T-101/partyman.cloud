@@ -1,5 +1,6 @@
 import re
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -65,7 +66,11 @@ class Request(TimeStampedModel):
     upcloud_server_address = models.GenericIPAddressField(blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     activated = models.DateTimeField(blank=True, null=True)
+    activated_by = models.ForeignKey(get_user_model(), blank=True, null=True, on_delete=models.SET_NULL,
+                                     related_name='activations')
     deactivated = models.DateTimeField(blank=True, null=True)
+    deactivated_by = models.ForeignKey(get_user_model(), blank=True, null=True, on_delete=models.SET_NULL,
+                                       related_name='deactivations')
 
 
 def __str__(self):
