@@ -9,7 +9,7 @@
             <thead>
             <tr>
                 <th colspan="2">Name</th>
-                <th>Start</th>
+                <th>Event info</th>
                 <th>Activated</th>
                 <th>Deactivated</th>
             </tr>
@@ -28,9 +28,34 @@
                             <a href="{% url 'request:activation-detail' object.pk %}" class="btn btn-primary">Manage</a>
                         {% endif %}
                     </td>
-                    <td><small>{{ object.party_start|date:"Y-m-d" }}</small></td>
-                    <td><small>{{ object.activated|date:"Y-m-d" }}<br>{{ object.activated|date:"H:i" }}</small></td>
-                    <td><small>{{ object.deactivated|date:"Y-m-d" }}<br>{{ object.deactivated|date:"H:i" }}</small></td>
+                    <td>
+                        <small>
+                            {{ object.party_start|date:"Y-m-d" }}<br>
+                            {{ object.upcloud_zone }}
+                        </small>
+                    </td>
+                    <td>
+                        {% if object.activated %}
+                            <small>
+                                <i class="fa-regular fa-calendar-days me-1"></i>{{ object.activated|date:"Y-m-d" }}<br>
+                                <i class="fa-regular fa-clock me-1"></i>{{ object.activated|date:"H:i" }}
+                                {% if object.activated_by %}
+                                    <br> <i class="fa-regular fa-user me-1"></i>{{ object.activated_by }}
+                                {% endif %}
+                            </small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if object.deactivated %}
+                            <small>
+                                <i class="fa-regular fa-calendar-days me-1"></i>{{ object.deactivated|date:"Y-m-d" }}<br>
+                                <i class="fa-regular fa-clock me-1"></i>{{ object.deactivated|date:"H:i" }}
+                                {% if object.deactivated_by %}
+                                    <br> <i class="fa-regular fa-user me-1"></i>{{ object.deactivated_by }}
+                                {% endif %}
+                            </small>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
