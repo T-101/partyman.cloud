@@ -25,7 +25,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a class="nav-link" href="{% url 'request:activation-list' %}">Activation</a>
-                {% if request.user.is_superuser %}
+                {% if user.is_superuser %}
                     <a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a>
                 {% endif %}
             </div>
