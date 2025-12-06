@@ -31,8 +31,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                <!-- <li class="nav-item"><a class="nav-link" href="{% url 'request:index' %}">Request</a></li> -->
+                {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'request:activation-list' %}" style="color:red">Activation</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#request">Request</a></li>
                 <li class="nav-item"><a class="nav-link" href="#portfolio">Portfolio</a></li>
                 <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
@@ -111,6 +116,17 @@
         </div>
     </div>
 </section>
+
+<section class="page-section bg-light" id="request">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="section-heading text-uppercase">Request an instance</h2>
+            <h3 class="section-subheading text-muted">Want to use a hosted version of PartyMan? Sign up here!</h3>
+            <a class="btn btn-primary btn-xl text-uppercase" href="{% url 'request:index' %}">Request</a>
+        </div>
+    </div>
+</section>
+
 <!-- Portfolio Grid-->
 <section class="page-section bg-light" id="portfolio">
     <div class="container">
