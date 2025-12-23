@@ -55,10 +55,13 @@ class ActivationDetailView(UpdateView):
 
     def form_valid(self, form):
         if "Deactivate" in self.request.POST["submit"]:
+            request = self.get_object()
+            form.instance.cloudflare_zone = request.cloudflare_zone
+            form.instance.domain = request.domain
+            form.instance.deactivated_by = self.request.user
             stop_upcloud_server(form.instance)
             delete_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.cloudflare_dns_record_id)
             delete_upcloud_server(form.instance)
-            form.instance.deactivated_by = self.request.user
             form.save()
             return HttpResponseRedirect(reverse_lazy("request:activation-list"))
         else:
