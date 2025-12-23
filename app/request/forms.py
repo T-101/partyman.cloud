@@ -75,6 +75,8 @@ class ActivationForm(ModelForm):
         if self.approved:
             self.fields['domain'].widget.attrs.update({"disabled": True})
             self.fields['cloudflare_zone'].widget.attrs.update({"disabled": True})
+            self.fields['domain'].required = False
+            self.fields['cloudflare_zone'].required = False
             self.fields['upcloud_zone'].widget.attrs.update({"disabled": True})
             self.fields['upcloud_plan'].widget.attrs.update({"disabled": True})
 
@@ -99,4 +101,3 @@ class ActivationForm(ModelForm):
                 self._get_submit_button()
             )
         )
-
