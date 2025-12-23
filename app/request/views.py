@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, UpdateView, ListView
 from django.utils import timezone
@@ -53,12 +54,13 @@ class ActivationDetailView(UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        print("Deactivate" in self.request.POST["submit"])
         if "Deactivate" in self.request.POST["submit"]:
             stop_upcloud_server(form.instance)
             delete_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.cloudflare_dns_record_id)
             delete_upcloud_server(form.instance)
             form.instance.deactivated_by = self.request.user
+            form.save()
+            return HttpResponseRedirect(reverse_lazy("request:activation-list"))
         else:
             # print(type(form.instance), vars(form.instance))
             domain = form.instance.domain + "." + form.instance.cloudflare_zone.name
