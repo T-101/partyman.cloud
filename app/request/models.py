@@ -73,8 +73,8 @@ class Request(TimeStampedModel):
                                        related_name='deactivations')
 
 
-def __str__(self):
-    return self.party_name
+    def __str__(self):
+        return f"{self.party_name} ({self.party_start.year})"
 
 
 class UpCloudZone(TimeStampedModel):
