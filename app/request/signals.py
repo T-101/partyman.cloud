@@ -1,5 +1,3 @@
-import threading
-
 from mailjet_rest import Client
 
 from django.db.models.signals import pre_save
@@ -7,7 +5,7 @@ from django.dispatch import receiver
 from django.conf import settings
 
 from request.models import Request, Email
-from request.email import render_emails
+from request.email import generate_request_received_admin_email, generate_request_received_email
 
 
 # This file is imported in apps.py
@@ -17,20 +15,8 @@ def prepare_request_received_emails(sender, instance, *args, **kwargs):
     if instance.pk:
         return
 
-    html, text = render_emails(instance, "request-received.html")
-    subject = f"Your PartyMan instance {instance.party_name}"
-    customer_mail = Email(recipients=[instance.contact_email], subject=subject, text_content=text, html_content=html)
-
-    subject = f"New PartyMan request: {instance.party_name}"
-    text = f"{instance.party_name} requested by {instance.contact_email}\n\n" \
-           f"Requested inception {instance.party_start}"
-    admin_email = Email(recipients=settings.ADMINS, subject=subject, text_content=text)
-
-    for item in [customer_mail, admin_email]:
-        threading.Thread(
-            target=item.save,
-            daemon=True
-        ).start()
+    generate_request_received_admin_email(instance)
+    generate_request_received_email(instance)
 
 
 @receiver(pre_save, sender=Email)
