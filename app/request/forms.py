@@ -10,13 +10,14 @@ class RequestForm(ModelForm):
     class Meta:
         model = Request
         fields = ['party_name', 'party_url', 'contact_email', 'party_start', 'party_end', 'domain', 'cloudflare_zone',
-                  'captcha']
+                  'inception_date', 'extra_info', 'captcha']
 
     cloudflare_zone = forms.ModelChoiceField(empty_label=None, queryset=None)
     captcha = TurnstileCaptchaField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['extra_info'].widget.attrs = {'rows': 3}
 
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -38,6 +39,11 @@ class RequestForm(ModelForm):
             Row(
                 Div('domain', css_class='form-group col-md-6 mb-0'),
                 Div('cloudflare_zone', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Div('inception_date', css_class='form-group col-md-6 mb-0'),
+                Div('extra_info', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
             Row(
