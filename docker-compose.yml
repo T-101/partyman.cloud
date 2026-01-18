@@ -6,7 +6,7 @@ services:
     image: local/partymancloud
 
     # command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:${CONTAINER_PORT}"
-    # command: bash -c "gunicorn config.wsgi -w ${UWSGI_WORKERS} -b 0.0.0.0:${CONTAINER_PORT}"
+    # command: bash -c "python manage.py migrate && gunicorn config.wsgi -w ${UWSGI_WORKERS} -b 0.0.0.0:${CONTAINER_PORT}"
 
     ports:
       - "127.0.0.1:${CONTAINER_PORT}:${CONTAINER_PORT}"
@@ -21,18 +21,27 @@ services:
     build: app
     image: local/partymancloud
     init: true
-    command: dramatiq config.tasks --processes 1 --threads 2
+    command: bash -c "python manage.py rundramatiq -p 1 -t 1"
     volumes:
       - ./app:/app
     restart: unless-stopped
     env_file: .env
     depends_on:
-      - redis
+      - app
+
+  cron:
+    build: app
+    image: local/partymancloud
+    init: true
+    command: bash -c "crontab /app/crontab.txt && crond -f"
+    volumes:
+      - ./app:/app
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - app
 
   redis:
     image: redis:7.4.1-alpine3.20
     restart: unless-stopped
     init: true
-    # To persist data
-    # volumes:
-    #   - redis_data:/data
