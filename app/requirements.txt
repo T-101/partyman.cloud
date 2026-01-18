@@ -1,14 +1,15 @@
 cloudflare==4.3.1
 crispy-bootstrap5==2025.6
-Django==5.2.9
+Django==5.2.10
 django-cf-turnstile==0.1.0
 django-crispy-forms==2.5
 django-debug-toolbar==4.4.6
+django-dramatiq==0.15.0
 django-environ==0.12.0
 django-extensions==4.1
-dramatiq==2.0.0
+dramatiq[redis, watch]==2.0.1
 gunicorn==23.0.0
-ipython==9.8.0
-Pillow==12.0.0
-redis==7.1.0
+ipython==9.9.0
+mailjet-rest==1.5.1
+Pillow==12.1.0
 requests==2.32.5
