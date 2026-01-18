@@ -1,10 +1,10 @@
 import json
 
-from django import forms
 from django.contrib import admin
 
 from .models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial, \
     Email
+from request.email import generate_request_activation_email, generate_request_received_email
 
 
 class ExternalURLInline(admin.TabularInline):
@@ -37,7 +37,18 @@ class RequestAdmin(admin.ModelAdmin):
                     'domain', 'cloudflare_zone', 'upcloud_zone', 'activated', 'deactivated']
     list_filter = ['party_start', 'party_end', 'upcloud_zone', 'cloudflare_zone', 'is_approved', 'activated',
                    'deactivated', 'created', 'modified']
-    search_fields = ['party_name', 'domain', 'cloudflare_zone', 'upcloud_zone']
+    search_fields = ['party_name', 'domain', 'cloudflare_zone__name', 'upcloud_zone__name']
+    actions = ['send_request_email', 'send_activation_email']
+
+    def send_request_email(self, request, queryset):
+        for row in queryset:
+            generate_request_received_email(row)
+        self.message_user(request, f"Successfully sent {len(queryset)} request email(s).")
+
+    def send_activation_email(self, request, queryset):
+        for row in queryset:
+            generate_request_activation_email(row)
+        self.message_user(request, f"Successfully sent {len(queryset)} activation email(s).")
 
 
 @admin.register(UpCloudZone)
