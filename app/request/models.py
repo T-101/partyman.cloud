@@ -56,8 +56,10 @@ class Request(TimeStampedModel):
     contact_email = models.EmailField(help_text="Contact email for the party organizer(s)")
     party_start = models.DateField()
     party_end = models.DateField()
-    inception_date = models.DateField()
-    extra_info = models.TextField(blank=True, null=True)
+    inception_date = models.DateField(help_text="Date when the instance should be online")
+    extra_info = models.TextField(blank=True, null=True,
+                                  help_text="Any extra information we might need. If the instance needs to be online " \
+                                            "much in advance, a reason should be given.")
     domain = models.CharField(max_length=255, validators=[domain_validator],
                               help_text='Subdomain for the instance without the host, usually name of the party. '
                                         'Accepted characters are a-z, 0-9 and hyphen (-). Example: myparty')
