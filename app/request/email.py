@@ -1,6 +1,7 @@
 import re
 import threading
 
+from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from request.models import Email, Request
@@ -12,19 +13,25 @@ def render_emails(request: Request, template_file: str) -> tuple[str, str]:
     return html, strip_tags(text.strip())
 
 
-def _generate_request_email(request: Request, html, text, recipients: list):
+def _generate_request_email(request: Request, subject, html, text, recipients: list = []):
     recipients = recipients if recipients else [request.contact_email]
-    subject = f"Your PartyMan instance {request.party_name} {request.party_start.year}"
     customer_mail = Email(recipients=recipients, subject=subject, text_content=text, html_content=html)
-
     threading.Thread(target=customer_mail.save, daemon=True).start()
 
 
-def generate_request_received_email(request, recipients: list = []):
+def generate_request_received_admin_email(request):
+    html, text = render_emails(request, template_file="request-received-admin.html")
+    subject = f"New PartyMan request: {request.party_name} {request.party_start.year}"
+    _generate_request_email(request, subject, html, text, settings.ADMINS)
+
+
+def generate_request_received_email(request):
     html, text = render_emails(request, template_file="request-received.html")
-    _generate_request_email(request, html, text, recipients)
+    subject = f"Your PartyMan request: {request.party_name} {request.party_start.year}"
+    _generate_request_email(request, subject, html, text)
 
 
-def generate_request_activation_email(request, recipients: list = []):
+def generate_request_activation_email(request):
     html, text = render_emails(request, template_file="request-activated.html")
-    _generate_request_email(request, html, text, recipients)
+    subject = f"Your PartyMan request: {request.party_name} {request.party_start.year}"
+    _generate_request_email(request, subject, html, text)
