@@ -35,6 +35,8 @@ DEBUG = env.bool('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
 
+ADMINS = env.list('ADMINS')
+
 DEBUG_TOOLBAR_CONFIG = {
     # Display Django Debug Toolbar in docker when DEBUG = True
     'SHOW_TOOLBAR_CALLBACK': lambda _: settings.DEBUG,  # this workaround was to make view tests run
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_dramatiq',
     # packages
     'django_extensions',
     'crispy_forms',
@@ -145,17 +148,44 @@ MEDIA_ROOT = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": "redis://redis:6379",
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+
+DRAMATIQ_RESULT_BACKEND = {
+    "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
+    "BACKEND_OPTIONS": {
+        "url": "redis://redis:6379",
+    },
+    "MIDDLEWARE_OPTIONS": {
+        "result_ttl": 1000 * 60 * 10
+    }
+}
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-CF_TURNSTILE_SITE_KEY = env.str('CF_TURNSTILE_SITE_KEY')
-CF_TURNSTILE_SECRET_KEY = env.str('CF_TURNSTILE_SECRET_KEY')
 
 UPCLOUD_API_USERNAME = env.str('UPCLOUD_API_USERNAME')
 UPCLOUD_API_PASSWORD = env.str('UPCLOUD_API_PASSWORD')
 UPCLOUD_API_URL = env.str('UPCLOUD_API_URL')
 
 CLOUDFLARE_API_TOKEN = env.str('CLOUDFLARE_API_TOKEN')
+CF_TURNSTILE_SITE_KEY = env.str('CF_TURNSTILE_SITE_KEY')
+CF_TURNSTILE_SECRET_KEY = env.str('CF_TURNSTILE_SECRET_KEY')
+
+MAILJET_API_KEY = env.str('MAILJET_API_KEY')
+MAILJET_API_SECRET = env.str('MAILJET_API_SECRET')
 
 INIT_SCRIPT_URL = "https://gitlab.com/T-101/pms3/-/raw/master/contrib/debian_init_script.sh"
