@@ -6,6 +6,22 @@ from django.forms import ModelForm
 from .models import Request, CloudflareZone
 
 
+def _password_field():
+    return forms.TextInput(attrs={"type": "password", "autocomplete": "current-password"})
+
+
+class AppSettingsForm(ModelForm):
+    class Meta:
+        model = Request
+        fields = '__all__'
+        widgets = {
+            "upcloud_api_password": _password_field(),
+            "cloudflare_api_token": _password_field(),
+            "cloudflare_turnstile_secret": _password_field(),
+            "mailjet_api_secret": _password_field()
+        }
+
+
 class RequestForm(ModelForm):
     class Meta:
         model = Request
