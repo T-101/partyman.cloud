@@ -2,8 +2,9 @@ import json
 
 from django.contrib import admin
 
-from .models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial, \
-    Email
+from request.forms import AppSettingsForm
+from request.models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial, \
+    Email, AppSettings
 from request.email import generate_request_activation_email, generate_request_received_email
 
 
@@ -15,6 +16,12 @@ class ExternalURLInline(admin.TabularInline):
 class TestimonialInline(admin.TabularInline):
     model = Testimonial
     extra = 0
+
+
+@admin.register(AppSettings)
+class AppSettingsAdmin(admin.ModelAdmin):
+    list_display = ['sandbox_mode', 'upcloud_api_url']
+    form = AppSettingsForm
 
 
 @admin.register(PortfolioItem)
