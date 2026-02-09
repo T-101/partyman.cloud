@@ -1,14 +1,13 @@
 import re
+from cryptography.fernet import Fernet, InvalidToken
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
+from django.core.cache import cache
 
 from django_extensions.db.models import TimeStampedModel
-from mailjet_rest import Client
 
 
 def domain_validator(value):
@@ -16,6 +15,73 @@ def domain_validator(value):
         raise ValidationError(
             'Domain can only contain lowercase letters (a-z), numbers (0-9) and hyphens (-).'
         )
+
+
+fernet = Fernet(settings.FERNET_ENCRYPTION_KEY)
+
+
+class SingletonModel(models.Model):
+    class Meta:
+        abstract = True
+
+    def set_cache(self):
+        cache.set(self.__class__.__name__, self)
+
+    def save(self, **kwargs):
+        self.pk = 1
+        super().save(**kwargs)
+        self.set_cache()
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        if cache.get(cls.__name__) is None:
+            try:
+                obj = cls.objects.get(pk=1)
+            except cls.DoesNotExist:
+                return cls.objects.none()
+            obj.set_cache()
+        return cache.get(cls.__name__)
+
+
+class FernetEncryptedCharField(models.CharField):
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+
+        # If it's already encrypted, leave it alone
+        try:
+            fernet.decrypt(value.encode())
+            return value
+        except InvalidToken:
+            return fernet.encrypt(value.encode()).decode()
+
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        return fernet.decrypt(value.encode()).decode()
+
+
+class AppSettings(SingletonModel):
+
+    class Meta:
+        verbose_name = "App Settings"
+        verbose_name_plural = "App Settings"
+
+    sandbox_mode = models.BooleanField(default=False,
+                                       help_text="Sandbox mode. Bypasses all Cloudflare and UpCloud functions")
+    upcloud_api_username = FernetEncryptedCharField(max_length=255)
+    upcloud_api_password = FernetEncryptedCharField(max_length=255)
+    upcloud_api_url = models.CharField(max_length=255)
+
+    cloudflare_api_token = FernetEncryptedCharField(max_length=255)
+    cloudflare_turnstile_key = FernetEncryptedCharField(max_length=255)
+    cloudflare_turnstile_secret = FernetEncryptedCharField(max_length=255)
+
+    mailjet_api_key = FernetEncryptedCharField(max_length=255)
+    mailjet_api_secret = FernetEncryptedCharField(max_length=255)
 
 
 class PortfolioItem(TimeStampedModel):
