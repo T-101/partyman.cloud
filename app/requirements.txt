@@ -1,5 +1,6 @@
 cloudflare==4.3.1
 crispy-bootstrap5==2025.6
+cryptography==46.0.4
 Django==5.2.10
 django-cf-turnstile==0.1.0
 django-crispy-forms==2.5
