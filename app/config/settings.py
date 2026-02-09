@@ -91,10 +91,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'request.context_processors.app_settings_context',
             ],
         },
     },
 ]
+
+CACHES = {
+    'default': env.cache()
+}
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -176,6 +181,8 @@ DRAMATIQ_RESULT_BACKEND = {
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+FERNET_ENCRYPTION_KEY = env.str('FERNET_ENCRYPTION_KEY')
 
 UPCLOUD_API_USERNAME = env.str('UPCLOUD_API_USERNAME')
 UPCLOUD_API_PASSWORD = env.str('UPCLOUD_API_PASSWORD')
