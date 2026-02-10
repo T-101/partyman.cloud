@@ -2,70 +2,168 @@
 
 {% block title %}Manage Partyman instances{% endblock %}
 
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+            integrity="sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", ready)
+
+        function ready() {
+
+            const zoneLabels = [
+                {% for zone in zones %}
+                    "{{ zone.upcloud_zone__name|escapejs }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+            const zoneCounts = [
+                {% for zone in zones %}
+                    {{ zone.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+
+            const planLabels = [
+                {% for plan in plans %}
+                    "{{ plan.upcloud_plan__name|escapejs }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+            const planCounts = [
+                {% for plan in plans %}
+                    {{ plan.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+
+            const zoneData = {
+                labels: zoneLabels,
+                datasets: [{
+                    label: "Instances by Zone",
+                    data: zoneCounts,
+                    backgroundColor: [
+                        "#0d6efd",
+                        "#198754",
+                        "#fd7e14",
+                        "#dc3545",
+                        "#20c997",
+                        "#6f42c1",
+                        "#ffc107",
+                        "#0dcaf0"
+                    ],
+                    borderWidth: 0,
+                    hoverBorderWidth: 0,
+                    hoverOffset: 4
+                }]
+            }
+
+            const planData = {
+                labels: planLabels,
+                datasets: [{
+                    label: "Plans",
+                    data: planCounts,
+                    backgroundColor: [
+                        "#6610f2",
+                        "#0dcaf0",
+                        "#198754",
+                        "#fd7e14",
+                        "#dc3545",
+                        "#6c757d",
+                        "#20c997",
+                        "#ffc107"
+                    ],
+                    borderWidth: 0,
+                    hoverBorderWidth: 0,
+                    hoverOffset: 4
+                }]
+            }
+
+            const chartZoneUsageElem = document.getElementById("chartZoneUsage"),
+                chartPlanUsageElem = document.getElementById("chartPlanUsage"),
+                chartZoneUsage = new Chart(chartZoneUsageElem, {type: "doughnut", data: zoneData}),
+                chartPlanUsage = new Chart(chartPlanUsageElem, {type: "doughnut", data: planData})
+        }
+
+    </script>
+{% endblock %}
+
 {% block content %}
     <h2>Manage Partyman instances</h2>
-    <div class="table-responsive">
-        <table class="table table-sm">
-            <thead>
-            <tr>
-                <th colspan="2">Name</th>
-                <th>Event info</th>
-                <th>Duration</th>
-                <th>Activated</th>
-                <th>Deactivated</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for object in object_list %}
-                <tr class="align-middle">
-                    <td>
-                        <small>
-                            {% if object.party_url %}
-                                <a href="{{ object.party_url }}">{{ object.party_name }}</a>
-                            {% else %}
-                                {{ object.party_name }}
-                            {% endif %}
-                        </small>
-                    </td>
-                    <td>
-                        {% if not object.deactivated %}
-                            <a href="{% url 'request:activation-detail' object.pk %}" class="btn btn-primary">Manage</a>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <small>
-                            {{ object.party_start|date:"Y-m-d" }}<br>
-                            {{ object.upcloud_zone }}
-                        </small>
-                    </td>
-                    <td>
-                        {{ object.duration_activated|duration_weeks_days_hours }}
-                    </td>
-                    <td>
-                        {% if object.activated %}
-                            <small>
-                                <i class="fa-regular fa-calendar-days me-1"></i>{{ object.activated|date:"Y-m-d" }}<br>
-                                <i class="fa-regular fa-clock me-1"></i>{{ object.activated|date:"H:i" }}
-                                {% if object.activated_by %}
-                                    <br> <i class="fa-regular fa-user me-1"></i>{{ object.activated_by }}
+
+    <div class="row">
+        <div class="col-12 col-md-9">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th colspan="2">Name</th>
+                        <th>Event info</th>
+                        <th>Duration</th>
+                        <th>Activated</th>
+                        <th>Deactivated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for object in object_list %}
+                        <tr class="align-middle">
+                            <td>
+                                <small>
+                                    {% if object.party_url %}
+                                        <a href="{{ object.party_url }}">{{ object.party_name }}</a>
+                                    {% else %}
+                                        {{ object.party_name }}
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if not object.deactivated %}
+                                    <a href="{% url 'request:activation-detail' object.pk %}" class="btn btn-primary">Manage</a>
                                 {% endif %}
-                            </small>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if object.deactivated %}
-                            <small>
-                                <i class="fa-regular fa-calendar-days me-1"></i>{{ object.deactivated|date:"Y-m-d" }}<br>
-                                <i class="fa-regular fa-clock me-1"></i>{{ object.deactivated|date:"H:i" }}
-                                {% if object.deactivated_by %}
-                                    <br> <i class="fa-regular fa-user me-1"></i>{{ object.deactivated_by }}
+                            </td>
+                            <td>
+                                <small>
+                                    {{ object.party_start|date:"Y-m-d" }}<br>
+                                    {{ object.upcloud_zone }}
+                                </small>
+                            </td>
+                            <td>
+                                {{ object.duration_activated|duration_weeks_days_hours }}
+                            </td>
+                            <td>
+                                {% if object.activated %}
+                                    <small>
+                                        <i class="fa-regular fa-calendar-days me-1"></i>{{ object.activated|date:"Y-m-d" }}<br>
+                                        <i class="fa-regular fa-clock me-1"></i>{{ object.activated|date:"H:i" }}
+                                        {% if object.activated_by %}
+                                            <br> <i class="fa-regular fa-user me-1"></i>{{ object.activated_by }}
+                                        {% endif %}
+                                    </small>
                                 {% endif %}
-                            </small>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                            </td>
+                            <td>
+                                {% if object.deactivated %}
+                                    <small>
+                                        <i class="fa-regular fa-calendar-days me-1"></i>{{ object.deactivated|date:"Y-m-d" }}<br>
+                                        <i class="fa-regular fa-clock me-1"></i>{{ object.deactivated|date:"H:i" }}
+                                        {% if object.deactivated_by %}
+                                            <br> <i class="fa-regular fa-user me-1"></i>{{ object.deactivated_by }}
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <h6>Average duration</h6>
+            {{ average_duration_activated|duration_weeks_days_hours }}
+            <hr/>
+            <h6>Zones by usage</h6>
+            <canvas id="chartZoneUsage" class="mb-4"></canvas>
+            <hr/>
+            <h6>Plans by Usage</h6>
+            <canvas id="chartPlanUsage" class="mb-4"></canvas>
+        </div>
     </div>
+
+
 {% endblock %}

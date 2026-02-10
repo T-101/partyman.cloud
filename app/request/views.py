@@ -1,4 +1,4 @@
-from django.db.models import Case, DateTimeField, DurationField, ExpressionWrapper, F, Value, When
+from django.db.models import Avg, Case, DateTimeField, DurationField, ExpressionWrapper, F, Value, When, Count
 from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -37,6 +37,24 @@ class SuccessView(TemplateView):
 
 class ActivationListView(ListView):
     template_name = "request/activation-list.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["zones"] = list(Request.objects
+                            .values("upcloud_zone__name")
+                            .filter(upcloud_zone__name__isnull=False)
+                            .annotate(count=Count("upcloud_zone__name")).order_by("-count"))
+        ctx["plans"] = list(Request.objects
+                            .values("upcloud_plan__name")
+                            .filter(upcloud_plan__name__isnull=False)
+                            .annotate(count=Count("upcloud_plan__name")).order_by("-count"))
+        ctx["average_duration_activated"] = (Request.objects.filter(activated__isnull=False, deactivated__isnull=False)
+        .aggregate(
+            avg_duration=Avg(
+                ExpressionWrapper(F("deactivated") - F("activated"), output_field=DurationField())
+            )
+        )["avg_duration"])
+        return ctx
 
     def get_queryset(self):
         return Request.objects.prefetch_related("activated_by", "deactivated_by", "upcloud_zone").annotate(
@@ -94,7 +112,8 @@ class ActivationDetailView(UpdateView):
                 if not server_id or not server_address:
                     form.add_error(None, "Failed to create UpCloud server")
                     return self.form_invalid(form)
-                cf_dns_id = create_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.domain, server_address)
+                cf_dns_id = create_cloudflare_dns_entry(form.instance.cloudflare_zone, form.instance.domain,
+                                                        server_address)
                 form.instance.cloudflare_dns_record_id = cf_dns_id
             form.instance.is_approved = True
             form.instance.activated_by = self.request.user
