@@ -190,3 +190,19 @@ def get_init_script(request: Request) -> str:
     script += "cd /opt/partyman\n"
     script += f"./init_partyman.sh {domain}\n"
     return script
+
+
+def duplicate_request(request: Request) -> Request:
+    data = {
+        "party_name": request.party_name,
+        "party_url": request.party_url,
+        "contact_email": request.contact_email,
+        "party_start": timezone.now(),
+        "party_end": timezone.now(),
+        "inception_date": request.inception_date,
+        "extra_info": request.extra_info,
+        "domain": request.domain,
+        "cloudflare_zone": request.cloudflare_zone
+    }
+
+    return Request.objects.create(**data)
