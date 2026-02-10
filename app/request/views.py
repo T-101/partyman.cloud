@@ -1,4 +1,5 @@
-from django.core.exceptions import ValidationError
+from django.db.models import Case, DateTimeField, DurationField, ExpressionWrapper, F, Value, When
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, UpdateView, ListView
@@ -38,7 +39,21 @@ class ActivationListView(ListView):
     template_name = "request/activation-list.html"
 
     def get_queryset(self):
-        return Request.objects.order_by("-party_start")
+        return Request.objects.annotate(
+            duration_activated=Case(
+                When(
+                    activated__isnull=False,
+                    then=ExpressionWrapper(
+                        Coalesce(
+                            "deactivated",
+                            Value(timezone.now(), output_field=DateTimeField()),
+                        ) - F("activated"),
+                        output_field=DurationField(),
+                    ),
+                ),
+                default=Value(None, output_field=DurationField()),
+            )
+        ).order_by("-party_start")
 
 
 class ActivationDetailView(UpdateView):
