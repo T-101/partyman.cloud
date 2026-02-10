@@ -3,6 +3,9 @@
 {% block title %}Manage Partyman instances{% endblock %}
 
 {% block extrahead %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css"/>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
             integrity="sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=" crossorigin="anonymous"></script>
     <script>
@@ -37,19 +40,10 @@
                 datasets: [{
                     label: "Instances by Zone",
                     data: zoneCounts,
-                    backgroundColor: [
-                        "#0d6efd",
-                        "#198754",
-                        "#fd7e14",
-                        "#dc3545",
-                        "#20c997",
-                        "#6f42c1",
-                        "#ffc107",
-                        "#0dcaf0"
-                    ],
+                    backgroundColor: ["#64b5f6", "#42a5f5", "#2196f3", "#1e88e5", "#1976d2", "#1565c0", "#0d47a1"],
                     borderWidth: 0,
                     hoverBorderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 8
                 }]
             }
 
@@ -58,19 +52,10 @@
                 datasets: [{
                     label: "Plans",
                     data: planCounts,
-                    backgroundColor: [
-                        "#6610f2",
-                        "#0dcaf0",
-                        "#198754",
-                        "#fd7e14",
-                        "#dc3545",
-                        "#6c757d",
-                        "#20c997",
-                        "#ffc107"
-                    ],
+                    backgroundColor: ["#64b5f6", "#42a5f5", "#2196f3", "#1e88e5", "#1976d2", "#1565c0", "#0d47a1"],
                     borderWidth: 0,
                     hoverBorderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 8
                 }]
             }
 
@@ -81,6 +66,12 @@
         }
 
     </script>
+
+    <style>
+        .smaller {
+            font-size: 0.6em;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -113,24 +104,30 @@
                             </td>
                             <td>
                                 {% if not object.deactivated %}
-                                    <a href="{% url 'request:activation-detail' object.pk %}" class="btn btn-primary">Manage</a>
+                                    <a href="{% url 'request:activation-detail' object.pk %}"
+                                       class="btn btn-primary btn-sm">Manage</a>
                                 {% endif %}
                             </td>
                             <td>
                                 <small>
                                     {{ object.party_start|date:"Y-m-d" }}<br>
+                                    {% if object.upcloud_zone %}
+                                        <span class="fi fi-{{ object.upcloud_zone.name|slice:"0:2" }}"></span>
+                                    {% endif %}
                                     {{ object.upcloud_zone }}
                                 </small>
                             </td>
                             <td>
-                                {% if not object.is_inactive %}
-                                    <i class="fa-solid fa-person-running"></i>
-                                {% endif %}
-                                {{ object.duration_activated|duration_weeks_days_hours }}
+                                <small>
+                                    {% if not object.is_inactive %}
+                                        <i class="fa-solid fa-person-running"></i>
+                                    {% endif %}
+                                    {{ object.duration_activated|duration_weeks_days_hours }}
+                                </small>
                             </td>
                             <td>
                                 {% if object.activated %}
-                                    <small>
+                                    <small class="smaller">
                                         <i class="fa-regular fa-calendar-days me-1"></i>{{ object.activated|date:"Y-m-d" }}<br>
                                         <i class="fa-regular fa-clock me-1"></i>{{ object.activated|date:"H:i" }}
                                         {% if object.activated_by %}
@@ -141,7 +138,7 @@
                             </td>
                             <td>
                                 {% if object.deactivated %}
-                                    <small>
+                                    <small class="smaller">
                                         <i class="fa-regular fa-calendar-days me-1"></i>{{ object.deactivated|date:"Y-m-d" }}<br>
                                         <i class="fa-regular fa-clock me-1"></i>{{ object.deactivated|date:"H:i" }}
                                         {% if object.deactivated_by %}
