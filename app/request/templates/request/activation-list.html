@@ -1,4 +1,4 @@
-{% extends 'request/base.html' %}
+{% extends 'request/base.html' %} {% load request_duration %}
 
 {% block title %}Manage Partyman instances{% endblock %}
 
@@ -10,7 +10,7 @@
             <tr>
                 <th colspan="2">Name</th>
                 <th>Event info</th>
-                <th>Time online</th>
+                <th>Duration</th>
                 <th>Activated</th>
                 <th>Deactivated</th>
             </tr>
@@ -39,7 +39,7 @@
                         </small>
                     </td>
                     <td>
-
+                        {{ object.duration_activated|duration_weeks_days_hours }}
                     </td>
                     <td>
                         {% if object.activated %}
