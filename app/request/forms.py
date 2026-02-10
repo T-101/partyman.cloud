@@ -80,19 +80,15 @@ class ActivationForm(ModelForm):
         fields = ['party_name', 'contact_email', 'domain', 'cloudflare_zone', 'upcloud_zone',
                   'upcloud_plan']
 
-    def _get_submit_button(self):
-        if self.approved and not self.deactivated:
-            return Submit('submit', 'Deactivate', css_class='btn btn-danger')
-        if not self.approved and not self.deactivated:
-            return Submit('submit', 'Activate')
-
     def __init__(self, *args, **kwargs):
         self.approved = kwargs.pop('approved', False)
         self.deactivated = kwargs.pop('deactivated', False)
         super().__init__(*args, **kwargs)
 
         self.fields['upcloud_zone'].widget.attrs.update({"autocomplete": "off"})
+        self.fields['upcloud_zone'].required = True
         self.fields['upcloud_plan'].widget.attrs.update({"autocomplete": "off"})
+        self.fields['upcloud_plan'].required = True
 
         if self.approved:
             self.fields['domain'].disabled = True
@@ -101,6 +97,7 @@ class ActivationForm(ModelForm):
             self.fields['upcloud_plan'].disabled = True
 
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Row(
                 Div('party_name', css_class='form-group col-md-6 mb-0'),
@@ -116,8 +113,5 @@ class ActivationForm(ModelForm):
                 Div('upcloud_zone', css_class='form-group col-md-6 mb-0'),
                 Div('upcloud_plan', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
-            ),
-            ButtonHolder(
-                self._get_submit_button()
             )
         )
