@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
     env_file: .env
     depends_on:
-      - redis
+      - valkey
 
   dramatiq:
     build: app
@@ -41,7 +41,7 @@ services:
     depends_on:
       - app
 
-  redis:
-    image: redis:7.4.1-alpine3.20
+  valkey:
+    image: valkey/valkey:9.0.2-alpine3.23
     restart: unless-stopped
     init: true

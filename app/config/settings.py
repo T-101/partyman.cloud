@@ -156,7 +156,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DRAMATIQ_BROKER = {
     "BROKER": "dramatiq.brokers.redis.RedisBroker",
     "OPTIONS": {
-        "url": "redis://redis:6379",
+        "url": "redis://valkey:6379",
     },
     "MIDDLEWARE": [
         "dramatiq.middleware.AgeLimit",
@@ -171,7 +171,7 @@ DRAMATIQ_BROKER = {
 DRAMATIQ_RESULT_BACKEND = {
     "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
     "BACKEND_OPTIONS": {
-        "url": "redis://redis:6379",
+        "url": "redis://valkey:6379",
     },
     "MIDDLEWARE_OPTIONS": {
         "result_ttl": 1000 * 60 * 10
