@@ -58,7 +58,7 @@ class ActivationListView(ListView):
 
     def get_queryset(self):
         return Request.objects.prefetch_related("activated_by", "deactivated_by", "upcloud_zone").annotate(
-            active_sort=Case(
+            is_inactive=Case(
                 When(activated__isnull=False, deactivated__isnull=True, then=Value(0)),
                 default=Value(1),
             ),
@@ -75,7 +75,7 @@ class ActivationListView(ListView):
                 ),
                 default=Value(None, output_field=DurationField()),
             )
-        ).order_by("active_sort", "-party_start")
+        ).order_by("is_inactive", "-party_start")
 
 
 class ActivationDetailView(UpdateView):

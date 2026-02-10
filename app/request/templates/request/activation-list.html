@@ -123,6 +123,9 @@
                                 </small>
                             </td>
                             <td>
+                                {% if not object.is_inactive %}
+                                    <i class="fa-solid fa-person-running"></i>
+                                {% endif %}
                                 {{ object.duration_activated|duration_weeks_days_hours }}
                             </td>
                             <td>
