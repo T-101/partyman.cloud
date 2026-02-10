@@ -39,7 +39,7 @@ class ActivationListView(ListView):
     template_name = "request/activation-list.html"
 
     def get_queryset(self):
-        return Request.objects.annotate(
+        return Request.objects.prefetch_related("activated_by", "deactivated_by", "upcloud_zone").annotate(
             duration_activated=Case(
                 When(
                     activated__isnull=False,
