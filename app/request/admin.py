@@ -50,12 +50,12 @@ class RequestAdmin(admin.ModelAdmin):
     def send_request_email(self, request, queryset):
         for row in queryset:
             generate_request_received_email(row)
-        self.message_user(request, f"Successfully sent {len(queryset)} request email(s).")
+        self.message_user(request, f"Successfully sent {queryset.count()} request email(s).")
 
     def send_activation_email(self, request, queryset):
         for row in queryset:
             generate_request_activation_email(row)
-        self.message_user(request, f"Successfully sent {len(queryset)} activation email(s).")
+        self.message_user(request, f"Successfully sent {queryset.count()} activation email(s).")
 
 
 @admin.register(UpCloudZone)
