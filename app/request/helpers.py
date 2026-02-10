@@ -5,10 +5,9 @@ import requests
 from cloudflare.types.dns import ARecord
 from requests.auth import HTTPBasicAuth
 
-from django.conf import settings
 from django.utils import timezone
 
-from request.models import CloudflareZone, UpCloudZone, Request, SSHKeys
+from request.models import CloudflareZone, UpCloudZone, Request, SSHKeys, AppSettings
 
 BASE_UPCLOUD_PAYLOAD = {
     "server": {
@@ -47,11 +46,17 @@ BASE_UPCLOUD_PAYLOAD = {
     }
 }
 
-UPCLOUD_AUTH = HTTPBasicAuth(settings.UPCLOUD_API_USERNAME, settings.UPCLOUD_API_PASSWORD)
+
+def get_upcloud_auth() -> HTTPBasicAuth:
+    settings = AppSettings.load()
+    return HTTPBasicAuth(settings.upcloud_api_username, settings.upcloud_api_password)
 
 
 def update_cloudflare_zones() -> None:
-    client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return
+    client = Cloudflare(api_token=settings.cloudflare_api_token)
     page = client.zones.list()
     cloudflare_ids = {zone.id for zone in page.result}
     existing_ids = set(CloudflareZone.objects.values_list("cloudflare_id", flat=True))
@@ -67,13 +72,19 @@ def update_cloudflare_zones() -> None:
 
 
 def get_cloudflare_dns_records(zone: CloudflareZone) -> list[ARecord]:
-    client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return
+    client = Cloudflare(api_token=settings.cloudflare_api_token)
     records = client.dns.records.list(zone_id=zone.cloudflare_id)
     return records.result
 
 
 def create_cloudflare_dns_entry(zone: CloudflareZone, domain: str, ip_address: str) -> str:
-    client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return ""
+    client = Cloudflare(api_token=settings.cloudflare_api_token)
     domain = f"{domain}.{zone.name}"
     dns_records = get_cloudflare_dns_records(zone)
     if domain in [record.name for record in dns_records]:
@@ -84,14 +95,20 @@ def create_cloudflare_dns_entry(zone: CloudflareZone, domain: str, ip_address: s
 
 
 def delete_cloudflare_dns_entry(zone: CloudflareZone, dns_record_id: str) -> str:
-    client = Cloudflare(api_token=settings.CLOUDFLARE_API_TOKEN)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return ""
+    client = Cloudflare(api_token=settings.cloudflare_api_token)
     res = client.dns.records.delete(zone_id=zone.cloudflare_id, dns_record_id=dns_record_id)
     return res.id
 
 
 def update_upcloud_zones():
-    url = settings.UPCLOUD_API_URL + "/1.3/zone"
-    res = requests.get(url, auth=UPCLOUD_AUTH).json()
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return
+    url = settings.upcloud_api_url + "/1.3/zone"
+    res = requests.get(url, auth=get_upcloud_auth()).json()
     upcloud_zone_names = [x.get("id") for x in res.get("zones").get("zone")]
     existing_zone_names = set(UpCloudZone.objects.values_list("name", flat=True))
     bulk_zones = []
@@ -106,6 +123,10 @@ def update_upcloud_zones():
 
 
 def create_upcloud_server(request: Request) -> (tuple[str, str]):
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return "", ""
+
     def make_payload():
         payload = deepcopy(BASE_UPCLOUD_PAYLOAD)
         payload["server"]["zone"] = request.upcloud_zone.name
@@ -123,9 +144,9 @@ def create_upcloud_server(request: Request) -> (tuple[str, str]):
     if not SSHKeys.objects.count():
         raise ValueError("No SSH keys available")
 
-    url = settings.UPCLOUD_API_URL + "/1.3/server"
+    url = settings.upcloud_api_url + "/1.3/server"
 
-    res = requests.post(url, auth=UPCLOUD_AUTH, json=make_payload()).json()
+    res = requests.post(url, auth=get_upcloud_auth(), json=make_payload()).json()
     request.upcloud_server_id = res["server"]["uuid"]
     request.upcloud_server_address = res["server"]["ip_addresses"]["ip_address"][0]["address"]
     request.activated = timezone.now()
@@ -134,21 +155,30 @@ def create_upcloud_server(request: Request) -> (tuple[str, str]):
 
 
 def stop_upcloud_server(request: Request) -> int:
-    url = settings.UPCLOUD_API_URL + f"/1.3/server/{request.upcloud_server_id}/stop"
-    res = requests.post(url, auth=UPCLOUD_AUTH)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return
+    url = settings.upcloud_api_url + f"/1.3/server/{request.upcloud_server_id}/stop"
+    res = requests.post(url, auth=get_upcloud_auth())
     return res.status_code
 
 
 def delete_upcloud_server(request: Request) -> int:
-    url = settings.UPCLOUD_API_URL + f"/1.3/server/{request.upcloud_server_id}?storages=1&backups=delete"
-    res = requests.delete(url, auth=UPCLOUD_AUTH)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return
+    url = settings.upcloud_api_url + f"/1.3/server/{request.upcloud_server_id}?storages=1&backups=delete"
+    res = requests.delete(url, auth=get_upcloud_auth())
     request.deactivated = timezone.now()
     request.save()
     return res.status_code
 
 
 def get_init_script(request: Request) -> str:
-    res = requests.get(settings.INIT_SCRIPT_URL)
+    settings = AppSettings.load()
+    if settings.sandbox_mode:
+        return ""
+    res = requests.get(settings.init_script_url)
     script = res.text
     domain = f"{request.domain}.{request.cloudflare_zone.name}"
     script = script.replace("$IP", domain)
@@ -160,3 +190,19 @@ def get_init_script(request: Request) -> str:
     script += "cd /opt/partyman\n"
     script += f"./init_partyman.sh {domain}\n"
     return script
+
+
+def duplicate_request(request: Request) -> Request:
+    data = {
+        "party_name": request.party_name,
+        "party_url": request.party_url,
+        "contact_email": request.contact_email,
+        "party_start": timezone.now(),
+        "party_end": timezone.now(),
+        "inception_date": request.inception_date,
+        "extra_info": request.extra_info,
+        "domain": request.domain,
+        "cloudflare_zone": request.cloudflare_zone
+    }
+
+    return Request.objects.create(**data)

@@ -32,8 +32,13 @@
             </div>
         </div>
     </div>
-
 </nav>
+
+{% if app_settings.sandbox_mode %}
+    <div class="alert alert-warning" role="alert">
+        Sandbox mode! Cloudflare and UpCloud functionalities disabled
+    </div>
+{% endif %}
 
 <div class="container my-4">
 

@@ -1,4 +1,4 @@
-{% extends 'request/base.html' %}
+{% extends 'request/base.html' %} {% load www-extras %}
 
 {% block title %}Manage Partyman instances{% endblock %}
 
@@ -10,18 +10,22 @@
             <tr>
                 <th colspan="2">Name</th>
                 <th>Event info</th>
+                <th>Duration</th>
                 <th>Activated</th>
                 <th>Deactivated</th>
             </tr>
             </thead>
             <tbody>
             {% for object in object_list %}
-                <tr>
+                <tr class="align-middle">
                     <td>
-                        {{ object.party_name }}
-                        {% if object.party_url %}
-                            <br> <small><a href="{{ object.party_url }}">{{ object.party_url }}</a></small>
-                        {% endif %}
+                        <small>
+                            {% if object.party_url %}
+                                <a href="{{ object.party_url }}">{{ object.party_name }}</a>
+                            {% else %}
+                                {{ object.party_name }}
+                            {% endif %}
+                        </small>
                     </td>
                     <td>
                         {% if not object.deactivated %}
@@ -33,6 +37,9 @@
                             {{ object.party_start|date:"Y-m-d" }}<br>
                             {{ object.upcloud_zone }}
                         </small>
+                    </td>
+                    <td>
+                        {{ object.duration_activated|duration_weeks_days_hours }}
                     </td>
                     <td>
                         {% if object.activated %}
