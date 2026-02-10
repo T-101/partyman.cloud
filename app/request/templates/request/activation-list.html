@@ -10,6 +10,7 @@
             <tr>
                 <th colspan="2">Name</th>
                 <th>Event info</th>
+                <th>Time online</th>
                 <th>Activated</th>
                 <th>Deactivated</th>
             </tr>
@@ -18,10 +19,13 @@
             {% for object in object_list %}
                 <tr>
                     <td>
-                        {{ object.party_name }}
-                        {% if object.party_url %}
-                            <br> <small><a href="{{ object.party_url }}">{{ object.party_url }}</a></small>
-                        {% endif %}
+                        <small>
+                            {% if object.party_url %}
+                                <a href="{{ object.party_url }}">{{ object.party_name }}</a>
+                            {% else %}
+                                {{ object.party_name }}
+                            {% endif %}
+                        </small>
                     </td>
                     <td>
                         {% if not object.deactivated %}
@@ -33,6 +37,9 @@
                             {{ object.party_start|date:"Y-m-d" }}<br>
                             {{ object.upcloud_zone }}
                         </small>
+                    </td>
+                    <td>
+
                     </td>
                     <td>
                         {% if object.activated %}
