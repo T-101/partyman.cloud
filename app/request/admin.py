@@ -3,9 +3,11 @@ import json
 from django.contrib import admin
 
 from request.forms import AppSettingsForm
-from request.models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, Testimonial, \
+from request.models import Request, UpCloudZone, CloudflareZone, UpCloudPlan, SSHKeys, PortfolioItem, ExternalURL, \
+    Testimonial, \
     Email, AppSettings
 from request.email import generate_request_activation_email, generate_request_received_email
+from request.helpers import duplicate_request
 
 
 class ExternalURLInline(admin.TabularInline):
@@ -45,7 +47,7 @@ class RequestAdmin(admin.ModelAdmin):
     list_filter = ['party_start', 'party_end', 'upcloud_zone', 'cloudflare_zone', 'is_approved', 'activated',
                    'deactivated', 'created', 'modified']
     search_fields = ['party_name', 'domain', 'cloudflare_zone__name', 'upcloud_zone__name']
-    actions = ['send_request_email', 'send_activation_email']
+    actions = ['send_request_email', 'send_activation_email', 'replicate_request']
 
     def send_request_email(self, request, queryset):
         for row in queryset:
@@ -56,6 +58,11 @@ class RequestAdmin(admin.ModelAdmin):
         for row in queryset:
             generate_request_activation_email(row)
         self.message_user(request, f"Successfully sent {queryset.count()} activation email(s).")
+
+    def replicate_request(self, request, queryset):
+        for row in queryset:
+            duplicate_request(row)
+        self.message_user(request, f"Successfully duplicated {queryset.count()} request(s).")
 
 
 @admin.register(UpCloudZone)
