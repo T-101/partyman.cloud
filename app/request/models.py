@@ -75,6 +75,7 @@ class AppSettings(SingletonModel):
     upcloud_api_username = FernetEncryptedCharField(max_length=255)
     upcloud_api_password = FernetEncryptedCharField(max_length=255)
     upcloud_api_url = models.CharField(max_length=255)
+    init_script_url = models.URLField(max_length=255)
 
     cloudflare_api_token = FernetEncryptedCharField(max_length=255)
     cloudflare_turnstile_key = FernetEncryptedCharField(max_length=255)
