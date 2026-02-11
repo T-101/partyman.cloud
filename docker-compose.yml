@@ -15,7 +15,8 @@ services:
     restart: unless-stopped
     env_file: .env
     depends_on:
-      - valkey
+      - valkey-cache
+      - valkey-dramatiq
 
   dramatiq:
     build: app
@@ -41,7 +42,26 @@ services:
     depends_on:
       - app
 
-  valkey:
+  valkey-cache:
     image: valkey/valkey:9.0.2-alpine3.23
-    restart: unless-stopped
     init: true
+    restart: unless-stopped
+    command: [ "valkey-server", "--save", "", "--appendonly", "no", "--loglevel", "notice" ]
+
+
+  valkey-dramatiq:
+    image: valkey/valkey:9.0.2-alpine3.23
+    init: true
+    restart: unless-stopped
+    # Option A (dev / OK to lose queued jobs on restart): disable persistence
+    # command: ["valkey-server", "--save", "", "--appendonly", "no", "--loglevel", "warning"]
+
+    # Option B (prod / don't lose queued jobs): enable AOF (recommended over frequent RDB)
+    # command: ["valkey-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", ""]
+
+
+    volumes:
+      - valkey_dramatiq_data:/data
+
+volumes:
+  valkey_dramatiq_data:
