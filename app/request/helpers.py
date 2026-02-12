@@ -182,10 +182,7 @@ def get_init_script(request: Request) -> str:
     script = res.text
     domain = f"{request.domain}.{request.cloudflare_zone.name}"
     script = script.replace("$IP", domain)
-    script += f"\ncertbot --nginx -d {domain} --register-unsafely-without-email --agree-tos --non-interactive\n"
-    script += "sed -i -e 's/443 ssl/443 ssl http2/' /etc/nginx/sites-available/partyman.conf\n"
-    script += "service nginx reload\n"
-    script += "cd /opt/\n"
+    script += "\ncd /opt/\n"
     script += "git clone https://gitlab.com/T-101/pms3.git partyman\n"
     script += "cd /opt/partyman\n"
     script += f"./init_partyman.sh {domain}\n"
