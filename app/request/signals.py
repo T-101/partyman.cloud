@@ -2,9 +2,8 @@ from mailjet_rest import Client
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.conf import settings
 
-from request.models import Request, Email
+from request.models import Request, Email, AppSettings
 from request.email import generate_request_received_admin_email, generate_request_received_email
 
 
@@ -21,7 +20,8 @@ def prepare_request_received_emails(sender, instance, *args, **kwargs):
 
 @receiver(pre_save, sender=Email)
 def send_email(sender, instance, **kwargs):
-    mailjet = Client(auth=(settings.MAILJET_API_KEY, settings.MAILJET_API_SECRET), version='v3.1')
+    settings = AppSettings.load()
+    mailjet = Client(auth=(settings.mailjet_api_key, settings.mailjet_api_secret), version='v3.1')
     if instance.pk:
         return
 
