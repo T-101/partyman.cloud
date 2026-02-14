@@ -3,7 +3,7 @@ from crispy_forms.layout import Row, Div, ButtonHolder, Submit
 from django_cf_turnstile.fields import TurnstileCaptchaField
 from django import forms
 from django.forms import ModelForm
-from .models import Request, CloudflareZone
+from .models import Request, CloudflareZone, AppSettings
 
 
 def _password_field():
@@ -29,7 +29,12 @@ class RequestForm(ModelForm):
                   'inception_date', 'extra_info', 'captcha']
 
     cloudflare_zone = forms.ModelChoiceField(empty_label=None, queryset=None)
-    captcha = TurnstileCaptchaField()
+
+    _app_settings = AppSettings.load()
+    captcha = TurnstileCaptchaField(
+        site_key=_app_settings.cloudflare_turnstile_key,
+        secret_key=_app_settings.cloudflare_turnstile_secret,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
