@@ -96,7 +96,7 @@ def create_cloudflare_dns_entry(zone: CloudflareZone, domain: str, ip_address: s
 
 def delete_cloudflare_dns_entry(zone: CloudflareZone, dns_record_id: str) -> str:
     settings = AppSettings.load()
-    if settings.sandbox_mode:
+    if settings.sandbox_mode or not dns_record_id:
         return ""
     client = Cloudflare(api_token=settings.cloudflare_api_token)
     res = client.dns.records.delete(zone_id=zone.cloudflare_id, dns_record_id=dns_record_id)
