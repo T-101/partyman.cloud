@@ -52,6 +52,13 @@ def get_upcloud_auth() -> HTTPBasicAuth:
     return HTTPBasicAuth(settings.upcloud_api_username, settings.upcloud_api_password)
 
 
+def get_upcloud_auth_header() -> dict:
+    settings = AppSettings.load()
+    return {
+        "Authorization": f"Bearer {settings.upcloud_api_password}"
+    }
+
+
 def update_cloudflare_zones() -> None:
     settings = AppSettings.load()
     if settings.sandbox_mode:
@@ -108,7 +115,7 @@ def update_upcloud_zones():
     if settings.sandbox_mode:
         return
     url = settings.upcloud_api_url + "/1.3/zone"
-    res = requests.get(url, auth=get_upcloud_auth()).json()
+    res = requests.get(url, headers=get_upcloud_auth_header()).json()
     upcloud_zone_names = [x.get("id") for x in res.get("zones").get("zone")]
     existing_zone_names = set(UpCloudZone.objects.values_list("name", flat=True))
     bulk_zones = []
@@ -146,7 +153,7 @@ def create_upcloud_server(request: Request) -> (tuple[str, str]):
 
     url = settings.upcloud_api_url + "/1.3/server"
 
-    res = requests.post(url, auth=get_upcloud_auth(), json=make_payload()).json()
+    res = requests.post(url, headers=get_upcloud_auth_header(), json=make_payload()).json()
     request.upcloud_server_id = res["server"]["uuid"]
     request.upcloud_server_address = res["server"]["ip_addresses"]["ip_address"][0]["address"]
     request.activated = timezone.now()
@@ -159,7 +166,7 @@ def stop_upcloud_server(request: Request) -> int:
     if settings.sandbox_mode:
         return
     url = settings.upcloud_api_url + f"/1.3/server/{request.upcloud_server_id}/stop"
-    res = requests.post(url, auth=get_upcloud_auth())
+    res = requests.post(url, headers=get_upcloud_auth_header())
     return res.status_code
 
 
@@ -168,7 +175,7 @@ def delete_upcloud_server(request: Request) -> int:
     if settings.sandbox_mode:
         return
     url = settings.upcloud_api_url + f"/1.3/server/{request.upcloud_server_id}?storages=1&backups=delete"
-    res = requests.delete(url, auth=get_upcloud_auth())
+    res = requests.delete(url, headers=get_upcloud_auth_header())
     request.deactivated = timezone.now()
     request.save()
     return res.status_code
