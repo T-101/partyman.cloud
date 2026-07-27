@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, UpdateView, ListView
 from django.utils import timezone
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from request.forms import RequestForm, ActivationForm
 from request.helpers import get_cloudflare_dns_records, create_cloudflare_dns_entry, create_upcloud_server, \
@@ -35,8 +36,11 @@ class SuccessView(TemplateView):
     template_name = "request/success.html"
 
 
-class ActivationListView(ListView):
+class ActivationListView(UserPassesTestMixin, ListView):
     template_name = "request/activation-list.html"
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -78,11 +82,14 @@ class ActivationListView(ListView):
         ).order_by("is_inactive", "-party_start")
 
 
-class ActivationDetailView(UpdateView):
+class ActivationDetailView(UserPassesTestMixin, UpdateView):
     template_name = "request/activation-detail.html"
     model = Request
     form_class = ActivationForm
     success_url = reverse_lazy('request:success')
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
