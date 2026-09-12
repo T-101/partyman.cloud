@@ -190,7 +190,7 @@ def get_init_script(request: Request) -> str:
     domain = f"{request.domain}.{request.cloudflare_zone.name}"
     script = script.replace("$IP", domain)
     script += "\ncd /opt/\n"
-    script += "git clone https://gitlab.com/T-101/pms3.git partyman\n"
+    script += "git clone https://gitlab.com/T-101/partyman.git partyman\n"
     script += "cd /opt/partyman\n"
     script += f"./init_partyman.sh {domain}\n"
     return script
